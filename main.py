@@ -48,12 +48,14 @@ print("動画を30FPSで読み込み、静止画に変換します。少々お�
 shutil.copy("video.mp4", "stills")
 # 作業ディレクトリをstillsにし、FFmpegでの変換コマンドを実行結果を非表示で実行
 os.chdir("stills")
+
 # 入力
 stream = ffmpeg.input("video.mp4")
 # 出力
 stream = ffmpeg.output(stream, "image_%04d.png", vcodec="png", r=30)
 # 実行
 ffmpeg.run(stream)
+
 os.remove("video.mp4")
 print("変換しました。")
 
@@ -62,14 +64,15 @@ print("各静止画から顔を検知します。")
 counter = 1
 os.mkdir("rectangled")
 
-for pngData in os.listdir("./"):
-	if not os.path.isfile(pngData):
-		continue
+dirList = os.listdir("./")
 
-	print("loaded:", pngData)
+for i in range(len(dirList)-1):
+	fileName = "image_%04d.png" % (i+1)
+
+	print("loaded:", fileName)
 
 	# 解析対象の画像を読み込み
-	image = cv2.imread(pngData)
+	image = cv2.imread(fileName)
 	# 600x600に画像をリサイズ、画素値を調整
 	(h, w) = image.shape[:2]
 	blob = cv2.dnn.blobFromImage(cv2.resize(image, (600, 600)), 1.0,
@@ -103,7 +106,7 @@ for pngData in os.listdir("./"):
 		cv2.putText(image, text, (startX, y),
 			cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 
-	output_file_name = "rectangled\\image_%04d.png" % counter
+	output_file_name = "rectangled/" + fileName
 	cv2.imwrite(output_file_name, image)
 	counter += 1
 
